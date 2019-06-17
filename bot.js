@@ -1,6 +1,5 @@
 /* Author: Mirai-Miki
- * Verson: 1.1
- * Date: 10/06/2019
+ * Verson: 1.2
  */
 
 const Discord = require("discord.js")
