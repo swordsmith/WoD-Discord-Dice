@@ -189,7 +189,7 @@ client.on('message', (receivedMessage) => {
         } else { // suxx
             suxx -= fail;
             if (suxx < 0) {
-                spec_suxx += modifier;
+                spec_suxx += suxx;
                 suxx = 0;
             }
             var total = (suxx + Number(mod) + (spec_suxx * 2));
