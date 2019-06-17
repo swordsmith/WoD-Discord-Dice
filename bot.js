@@ -1,16 +1,15 @@
 /* Author: Mirai-Miki
- * Verson: 1.1
- * Date: 10/06/2019
+ * Verson: 1.2
  */
 
 const Discord = require("discord.js")
 const config = require("./config.json")
 const client = new Discord.Client()
 
-/*
+
 const Error = {
-    REASON
-}*/
+    REASON: 1
+}
 
 client.on("ready", () => {
         console.log("Connected as: " + client.user.tag)})
@@ -25,9 +24,12 @@ client.on('message', (receivedMessage) => {
     if (receivedMessage.content.substring(0, 3) == "/d ") { // start bot
         var msg = receivedMessage.content.substring(3);
         var arg;
-        // A valid message must include "@" && " "
-        if (!msg.includes("@") || !msg.includes(" ") || msg.length < 5) {
-            usage(receivedMessage)
+        // A valid message must include " " and a reason
+        if (msg.length < 3) {
+            usage(receivedMessage);
+            return;
+        } else if (!msg.includes(" ")) {
+            usage(receivedMessage, Error.REASON);
             return;
         }
 
@@ -36,6 +38,9 @@ client.on('message', (receivedMessage) => {
         for (var i = 0;;i++) {
             if (i == msg.length) {
                 usage(receivedMessage)
+                return;
+            } else if (msg[i] == ' ' && (i + 1) == msg.length) {
+                usage(receivedMessage, Error.REASON);
                 return;
             } else if (msg[i] == ' ') {
                 arg = [msg.substring(0, i), msg.substring(i+1)];
@@ -213,7 +218,13 @@ function usage(receivedMessage, error=0) {
     switch (error) {
         case 0:
             receivedMessage.channel.send(receivedMessage.author.toString() + 
-                ' Bot Usage: `dice@diff+mod(spec) reason` Examples: ' +
+                ' Bot Usage: `/d dice@diff+mod(spec) "reason"` \nExamples: ' +
                 '`3@2+1s Auspex`, `3@2+1 Auspex`, `3@2+s Auspex`, `3@2 Auspex`');
+            break;
+        case Error.REASON:
+            receivedMessage.channel.send(receivedMessage.author.toString() + 
+                " Please add the reason you rolled." +
+                " For example: `/d 3@2 Auspex`");
+            break;
     }    
 }
