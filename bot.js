@@ -1,15 +1,116 @@
 /* Author: Mirai-Miki
- * Verson: 1.2
+ * Verson: 1.3
  */
 
 const Discord = require("discord.js")
 const config = require("./config.json")
 const client = new Discord.Client()
 
+////////////////////////////////// Constants //////////////////////////////////
 
 const Error = {
-    REASON: 1
+    REASON: 1,
+    INIT: 2,
 }
+
+////////////////////////////// Functions //////////////////////////////////////
+
+// Explains how to use the bot
+function usage(receivedMessage, error=0) {
+    switch (error) {
+        case 0:
+            receivedMessage.channel.send(receivedMessage.author.toString() + 
+                ' Bot Usage: `/d dice@diff+mod(spec) "reason"` \nExamples: ' +
+                '`3@2+1s Auspex`, `3@2+1 Auspex`, `3@2+s Auspex`, `3@2 Auspex`');
+            break;
+        case Error.REASON:
+            receivedMessage.channel.send(receivedMessage.author.toString() + 
+                " Please add the reason you rolled." +
+                " For example: `/d 3@2 Auspex`");
+            break;
+        case Error.INIT:
+            receivedMessage.channel.send(receivedMessage.author.toString() + 
+                " Bot Usage: `/i (dex+wits)`\nExample: `/i 7`");
+            break;
+    }    
+}
+
+/*
+ * It takes an initiative message and rolls one 10 sided dice. The result will
+ * be added to the number received by the bot send the total back to the player
+ *
+ * recv_mess: message received by the player must be a positive int between 0
+ *            and 30
+ */
+function initiative(recv_mess) {
+    let input = recv_mess.content.substring(3);
+    let dice;
+    let message;
+
+    if (!parse_init(input)) {
+        usage(recv_mess, Error.INIT);
+        return;
+    }
+
+    dice = roll_dice();
+    message = construct_mess(dice, input, recv_mess.author.toString());
+    send_message(recv_mess, message);
+}
+
+/*
+ * Takes an input and if the input is valid returns true
+ *
+ * input: the message to be parsed
+ * return: Returns true if the input is a valid int between 0 and 30
+ */
+function parse_init(input) {
+    if (input.length != 1 && input.length != 2) {
+        return false;
+    }
+
+    for (let i = 0; i < input.length; i++) {
+        if (input[i] < "0" || input[i] > "9") {
+            return false;
+        }
+    }
+    return true;
+}
+
+/*
+ * Rolls a 10 sided dice and returns the number
+ *
+ * return: returns an int 1<=int<=10
+ */
+function roll_dice() {
+    return Math.floor(Math.random() * 10)+1;
+}
+
+/*
+ * Constructs the initiative roll using the dice roll and input provided
+ *
+ * dice: the result of a single 10 sided dice roll
+ * input: the valid int that the player provided
+ * author: The user who send the command to start
+ *
+ * return: returns the message to be sent back to the player.
+ */
+function construct_mess(dice, input, author) {
+    return (author + " Rolling for initiative" +
+        "\n[" + dice + "] + " + input + "\n```css\nTotal: " + 
+        (dice + Number(input)) + "\n```");
+}
+
+/*
+ * Sends a message to the same channel that the original message was received.
+ *
+ * recv_mess: Message that was received to prompt a return message
+ * message: message to be sent to the user
+ */
+function send_message(recv_mess, message) {
+    recv_mess.channel.send(message);
+}
+
+////////////////////////////////// Main Loop //////////////////////////////////
 
 client.on("ready", () => {
         console.log("Connected as: " + client.user.tag)})
@@ -21,7 +122,10 @@ client.on('message', (receivedMessage) => {
     }
 
     // checks if a message is a command to start the bot
-    if (receivedMessage.content.substring(0, 3) == "/d ") { // start bot
+    if (receivedMessage.content.substring(0, 3) == "/i ") {
+        initiative(receivedMessage);
+
+    } else if (receivedMessage.content.substring(0, 3) == "/d ") {
         var msg = receivedMessage.content.substring(3);
         var arg;
         // A valid message must include " " and a reason
@@ -133,11 +237,6 @@ client.on('message', (receivedMessage) => {
             return;
         }
 
-        // Debug prints
-        //console.log("dice: "+dice);
-        //console.log("diff: "+diff);
-        //console.log("mod : "+mod);
-
         // Rolling the Dice
         var d_pool = [];
         var suxx = 0;
@@ -189,13 +288,16 @@ client.on('message', (receivedMessage) => {
         if (suxx == 0 && fail > 0 && spec_suxx == 0 && Number(mod) == 0) { 
             // botched
             new_mess += "```diff\n- Botched!!\n```";
-        } else if (fail >= (suxx + Number(mod) + spec_suxx)) { // failed
+        } else if (fail >= (suxx + spec_suxx) && Number(mod) == 0) { // failed
             new_mess += "```fix\nFailed!\n```";
         } else { // suxx
             suxx -= fail;
             if (suxx < 0) {
                 spec_suxx += suxx;
                 suxx = 0;
+                if (spec_suxx < 0) {
+                    spec_suxx = 0;
+                }
             }
             var total = (suxx + Number(mod) + (spec_suxx * 2));
             new_mess += "```css\nRolled: " + total + " suxx\n```";
@@ -208,23 +310,4 @@ client.on('message', (receivedMessage) => {
 
 // Logs into the server using the secret token
 bot_secret_token = config.token;
-
 client.login(bot_secret_token)
-
-////////////////////////////// Functions //////////////////////////////////////
-
-// Explains how to use the bot
-function usage(receivedMessage, error=0) {
-    switch (error) {
-        case 0:
-            receivedMessage.channel.send(receivedMessage.author.toString() + 
-                ' Bot Usage: `/d dice@diff+mod(spec) "reason"` \nExamples: ' +
-                '`3@2+1s Auspex`, `3@2+1 Auspex`, `3@2+s Auspex`, `3@2 Auspex`');
-            break;
-        case Error.REASON:
-            receivedMessage.channel.send(receivedMessage.author.toString() + 
-                " Please add the reason you rolled." +
-                " For example: `/d 3@2 Auspex`");
-            break;
-    }    
-}

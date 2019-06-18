@@ -23,13 +23,15 @@ Example rolls
     "/d 1@10+s reason"
     "/d 4@9 reason"
 
-"dice+modifier reason" :
-    dice     = number of dice to be rolled. 
-               must be greater then 0 and less than 30
-    modifier = (optional) number to be added to the roll. 
-               must be less than 30
-    reason   = the reason for the roll. must be included.
+"/i " - is the command to roll for initiative
+
+"/i (wits+dexterity)"
+    wits      = Number of dots you have in wits
+    dexterity = Number of dots you have in dexterity
+
+    note: Only the total should be entered so do not enter 4+3 but instead just enter 7
 
 Example rolls
-    "/d 5+6 reason"
-    "/d 1 reason"
+   "/i 7"
+   "/i 3"
+   "/i 12"
