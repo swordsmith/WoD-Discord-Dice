@@ -1,10 +1,11 @@
 /* Author: Mirai-Miki
- * Verson: 1.4
+ * Verson: 1.5.0
  */
 
-const Discord = require("discord.js")
-const config = require("./config.json")
-const client = new Discord.Client()
+const Discord = require("discord.js");
+const fs = require("fs");
+const config = require("./config.json");
+const client = new Discord.Client();
 
 ////////////////////////////////// Constants //////////////////////////////////
 
@@ -455,14 +456,80 @@ class DiffRoll {
     }
 }
 
+class Database {
+    constructor() {
+        this.path;
+        this.db = {};
+    }
+
+    open(name) {
+        this.path = name+".json";
+        let contents;
+        if(fs.existsSync(this.path)) { // Guild database exists
+            contents = fs.readFileSync(this.path, "utf-8");
+            this.db = JSON.parse(contents);
+        } else { // Init database
+            this.db["Active"] = [];
+            this.db["Inactive"] = [];
+        }
+    }
+
+    /*
+     * Searches the database for a key and returns its value.
+     * if no such key exists nothing will be returned.
+     *
+     * name: Name of the key to be searched.
+     *
+     * return: Returns the value of the key if it exists else returns undefined.
+     */
+    find(key) {
+        return this.db[key];
+    }
+
+    delete_db() {
+        if(fs.existsSync(this.path)) { // Guild database exists
+            fs.unlinkSync(this.path);
+        }        
+    }
+
+    close() {
+        let contents = JSON.stringify(this.db);
+        fs.writeFileSync(this.path, contents, "utf-8", (err) => {
+            if (err) throw err;
+        });
+    }
+}
+
 ////////////////////////////////// Main Loop //////////////////////////////////
 
 client.on("ready", () => {
-        console.log("Connected as: " + client.user.tag)})
+        console.log("Connected as: " + client.user.tag);
+        client.user.setActivity('World of Darkness', { type: 'PLAYING' });
+});
+
+client.on("guildCreate", (guild) => {
+    let db = new Database();
+    db.open("guilds");
+    db.find("Active").push(guild.name);
+    if (db.find("Inactive").indexOf(guild.name) != -1) {
+        db.find("Inactive").splice((db.find("Inactive").indexOf(guild.name)), 1);
+    }
+    db.close();
+});
+
+client.on("guildDelete", (guild) => {
+    let db = new Database();
+    db.open("guilds");
+    db.find("Inactive").push(guild.name);
+    if (db.find("Active").indexOf(guild.name) != -1) {
+        db.find("Active").splice((db.find("Active").indexOf(guild.name)), 1);
+    }
+    db.close();
+});
 
 client.on('message', (receivedMessage) => {
     // Prevent bot from responding to its own messages
-    if (receivedMessage.author == client.user) {
+    if (receivedMessage.author.bot) {
         return
     }
 
@@ -474,7 +541,7 @@ client.on('message', (receivedMessage) => {
         dice(receivedMessage);
     }
     
-})
+});
 
 // Logs into the server using the secret token
 botToken = config.token;
