@@ -1,5 +1,5 @@
 /* Author: Mirai-Miki
- * Verson: 1.5.1
+ * Verson: 1.5.2
  */
 
 const Discord = require("discord.js");
@@ -493,7 +493,7 @@ class Database {
     }
 
     close() {
-        let contents = JSON.stringify(this.db);
+        let contents = JSON.stringify(this.db, null, 2);
         fs.writeFileSync(this.path, contents, "utf-8", (err) => {
             if (err) throw err;
         });
