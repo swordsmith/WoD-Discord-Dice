@@ -1,5 +1,5 @@
 /* Author: Mirai-Miki
- * Verson: 1.5.0
+ * Verson: 1.5.1
  */
 
 const Discord = require("discord.js");
@@ -463,7 +463,7 @@ class Database {
     }
 
     open(name) {
-        this.path = name+".json";
+        this.path = (config.path + name + ".json");
         let contents;
         if(fs.existsSync(this.path)) { // Guild database exists
             contents = fs.readFileSync(this.path, "utf-8");
