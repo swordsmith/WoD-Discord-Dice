@@ -1,5 +1,5 @@
 /* Author: Mirai-Miki
- * Verson: 1.5.2
+ * Verson: 1.5.3
  */
 
 const Discord = require("discord.js");
@@ -245,7 +245,9 @@ class DiceMessage {
             let count = 0;
             for (let i = 0; i < arg.length; i++) { // Start Parse
                 if (!difSwap && !modSwap) { // Dice side
-                    if (arg[i] == '@') { // We hit the @             
+                    if(!count && arg[i] == ' ') {
+                        continue;
+                    } else if (arg[i] == '@') { // We hit the @             
                         if (!count || arg.length == (i+1) || arg[i+1] == " ") {
                             // Cannot be the end and must have at least 1 dice
                             return;
@@ -321,7 +323,9 @@ class DiceMessage {
 
             for (let i = 0; i < arg.length; i++) {
                 if (!changeSide) { // dice side
-                    if (arg[i] == 'd') {
+                    if(!count && arg[i] == ' ') {
+                        continue;
+                    } else if (arg[i] == 'd') {
                         if (!count || arg.length == (i+1) || arg[i+1] == ' ') {
                             return;
                         } else {
