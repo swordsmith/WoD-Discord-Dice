@@ -138,7 +138,10 @@ client.on("guildDelete", (guild) => {
 client.on('message', (recvMess) => {
     // Prevent bot from responding to other bots
     if (recvMess.author.bot) {
-        return
+        return;
+    } else if (!recvMess.guild) {
+        recvMess.author.send("Commands must be sent from a server.");
+        return;
     }
 
     // checks if a message is a command to start the bot

@@ -8,11 +8,7 @@ const config = require("../config.json");
 
 module.exports = class Settings {
     constructor(recvMess) {
-        let msg = (recvMess.author + " **Error**: invalid key value pair." +
-                "\n/d set diffReason true/false\n" +
-                "/d set rollEeason true/false\n" +
-                "/d set failEmote string\n" + "/d set specEmote string\n" +
-                "/d set diff string");
+        let msg = "";
         if (!Util.is_admin(recvMess.member)) {
             msg = (recvMess.author + " Only admins can change these.");
             Util.send_message(recvMess, msg);
@@ -24,6 +20,27 @@ module.exports = class Settings {
         if (setting.is_empty()) {
             Util.init_settings(setting);
         }
+        msg = (recvMess.author + " **Error**: invalid key value pair." +
+                "\n/d set diffReason true/false | (");
+
+        if (setting.find("requireDiffReason")) {
+            msg += "true)"
+        } else {
+            msg += "false)"
+        }
+
+        msg += "\n/d set rollReason true/false | (";
+
+        if (setting.find("requireRollReason")) {
+            msg += "true)"
+        } else {
+            msg += "false)"
+        }
+
+        msg += ("\n/d set failEmote string | (" + setting.find("failEmote") +
+                ")\n/d set specEmote string | (" + setting.find("specEmote") +
+                ")\n/d set diff string | (" + setting.find("diff") + 
+                ")\n/d set botchTag @tag | (" + setting.find("botchTag") + ")");
 
         if (!input) {
             Util.send_message(recvMess, msg);
@@ -40,9 +57,9 @@ module.exports = class Settings {
             switch (input[0]) {
                 case "diffreason":
                     if (input[1] == "false") {
-                        setting.update("requireDiffReason", false);
+                        setting.add("requireDiffReason", false);
                     } else if (input[1] == "true") {
-                        setting.update("requireDiffReason", true);
+                        setting.add("requireDiffReason", true);
                     } else {
                         Util.send_message(recvMess, msg);
                         return;
@@ -50,22 +67,25 @@ module.exports = class Settings {
                     break;
                 case "rollreason":
                     if (input[1] == "false") {
-                        setting.update("requireRollReason", false);
+                        setting.add("requireRollReason", false);
                     } else if (input[1] == "true") {
-                        setting.update("requireRollReason", true);
+                        setting.add("requireRollReason", true);
                     } else {
                         Util.send_message(recvMess, msg);
                         return;
                     }
                     break;
                 case "failemote":
-                    setting.update("failEmote", input[1]);
+                    setting.add("failEmote", input[1]);
                     break;
                 case "specemote":
-                    setting.update("specEmote", input[1]);
+                    setting.add("specEmote", input[1]);
                     break;
                 case "diff":
-                    setting.update("diff", input[1]);
+                    setting.add("diff", input[1]);
+                    break;
+                case "botchtag":
+                    setting.add("botchTag", input[1]);
                     break;
                 default:
                     Util.send_message(recvMess, msg);

@@ -78,7 +78,11 @@ module.exports = class DiffRoll {
                     }
             }
             if (this.dicePool.length == (i+1)) {
-                msg += "]\n";
+                msg += "] ";
+                if (this.botched && (setting.find("botchTag") != undefined)) {
+                    msg += setting.find("botchTag");
+                }
+                msg += "\n";
             } else {
                 msg += ",";
             }

@@ -2,6 +2,8 @@
  * Author: Michael Bossner
  */
 
+const config = require("../config.json");
+
  /*
  * Sends a message to the same channel that the original message was received.
  *
@@ -18,6 +20,7 @@ exports.init_settings = (setting) => {
     setting.new("failEmote", config.failEmote);
     setting.new("specEmote", config.specEmote);
     setting.new("diff", config.diff);
+    setting.new("botchTag", config.botchTag);
     setting.close();
 }
 
